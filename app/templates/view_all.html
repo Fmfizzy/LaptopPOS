@@ -1,0 +1,78 @@
+<!-- # app/templates/view_all.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="repairs-tab" data-bs-toggle="tab" data-bs-target="#repairs" type="button">
+                    Repair Jobs
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" type="button">
+                    Invoices
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="quotations-tab" data-bs-toggle="tab" data-bs-target="#quotations" type="button">
+                    Quotations
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button">
+                    Customers
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content mt-3" id="myTabContent">
+            <div class="tab-pane fade show active" id="repairs">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Job Number</th>
+                            <th>Customer</th>
+                            <th>Model</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repair in repairs %}
+                        <tr>
+                            <td>{{ repair.job_number }}</td>
+                            <td>{{ repair.customer.name }}</td>
+                            <td>{{ repair.laptop_model }}</td>
+                            <td>{{ repair.status }}</td>
+                            <td>{{ repair.created_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('view_repair', repair_id=repair.id) }}" class="btn btn-sm btn-info">View / Edit</a>
+                                {% if repair.status == 'repaired' %}
+                                <a href="{{ url_for('create_invoice', repair_id=repair.id) }}" class="btn btn-sm btn-success">Create Invoice</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Similar tables for other tabs -->
+            <div class="tab-pane fade" id="invoices">
+                <!-- Invoices table -->
+            </div>
+            
+            <div class="tab-pane fade" id="quotations">
+                <!-- Quotations table -->
+            </div>
+            
+            <div class="tab-pane fade" id="customers">
+                <!-- Customers table -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

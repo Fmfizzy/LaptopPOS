@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Create Invoice for Job #{{ repair.job_number }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>Customer:</strong> {{ repair.customer.name }}
+            </div>
+            <div class="col-md-4">
+                <strong>Contact:</strong> {{ repair.customer.contact_number }}
+            </div>
+            <div class="col-md-4">
+                <strong>Date:</strong> {{ today.strftime('%Y-%m-%d') }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Laptop Model:</strong> {{ repair.laptop_model }}
+            </div>
+            <div class="col-md-6">
+                <strong>Serial Number:</strong> {{ repair.serial_number }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" id="invoiceForm">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Repair Items</h5>
+            <button type="button" class="btn btn-sm btn-primary" onclick="addRepairItem()">Add Item</button>
+        </div>
+        <div class="card-body">
+            <div id="repair-items">
+                <div class="repair-item mb-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Repair Type</label>
+                            <input type="text" class="form-control" name="repair_type[]" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Repair Note</label>
+                            <input type="text" class="form-control" name="repair_note[]" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Warranty (Months)</label>
+                            <input type="number" class="form-control" name="warranty_months[]" value="0" min="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Price</label>
+                            <input type="number" class="form-control price-input" name="price[]" step="0.01" required onchange="updateTotal()">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-9 text-end">
+                    <strong>Total Amount:</strong>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="total_amount" name="total_amount" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Invoice</button>
+</form>
+
+<script>
+function addRepairItem() {
+    const template = document.querySelector('.repair-item').cloneNode(true);
+    template.querySelector('.price-input').value = '';
+    document.getElementById('repair-items').appendChild(template);
+}
+
+function removeRepairItem(button) {
+    if (document.querySelectorAll('.repair-item').length > 1) {
+        button.closest('.repair-item').remove();
+        updateTotal();
+    }
+}
+
+function updateTotal() {
+    const prices = Array.from(document.getElementsByClassName('price-input'))
+        .map(input => parseFloat(input.value) || 0);
+    const total = prices.reduce((sum, price) => sum + price, 0);
+    document.getElementById('total_amount').value = total.toFixed(2);
+}
+</script>
+{% endblock %}
