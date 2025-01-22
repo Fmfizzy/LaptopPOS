@@ -1,16 +1,27 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from app import create_app, db
 from app.models import Customer, RepairInvoice, RepairItem, RepairJob
 from datetime import datetime
 import random
 import string
 
+REPAIR_STATUSES = ['Open', 'In-Repair', 'Repaired', 'Paid']
+STATUS_COLORS = {
+    'Open': 'table-warning',
+    'In-Repair': 'table-info',
+    'Repaired': 'table-success',
+    'Paid': 'table-secondary'
+}
+
 app = create_app()
 
 @app.route('/')
 def index():
     repairs = RepairJob.query.order_by(RepairJob.created_date.desc()).all()
-    return render_template('view_all.html', repairs=repairs)
+    return render_template('view_all.html', 
+                         repairs=repairs,
+                         repair_statuses=REPAIR_STATUSES,
+                         status_colors=STATUS_COLORS)
 
 @app.route('/repair/new', methods=['GET', 'POST'])
 def new_repair():
@@ -57,7 +68,7 @@ def view_repair(repair_id):
 def create_invoice(repair_id):
     repair = RepairJob.query.get_or_404(repair_id)
     
-    if repair.status != 'repaired':
+    if repair.status != 'Repaired':
         flash('Cannot create invoice for job that is not repaired')
         return redirect(url_for('index'))
     
@@ -128,6 +139,18 @@ def delete_repair(repair_id):
     flash('Repair record deleted successfully!')
     return redirect(url_for('index'))
 
+@app.route('/repair/<int:repair_id>/status', methods=['POST'])
+def update_status(repair_id):
+    repair = RepairJob.query.get_or_404(repair_id)
+    new_status = request.form.get('status')
+    if new_status in REPAIR_STATUSES:
+        repair.status = new_status
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'colorClass': STATUS_COLORS[new_status]
+        })
+    return jsonify({'success': False}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

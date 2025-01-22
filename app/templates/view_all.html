@@ -6,30 +6,34 @@
     <div class="col-md-12">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="repairs-tab" data-bs-toggle="tab" data-bs-target="#repairs" type="button">
+                <button class="nav-link active" id="repairs-tab" data-bs-toggle="tab" data-bs-target="#repairs"
+                    type="button">
                     Repair Jobs
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" type="button">
+                <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices"
+                    type="button">
                     Invoices
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="quotations-tab" data-bs-toggle="tab" data-bs-target="#quotations" type="button">
+                <button class="nav-link" id="quotations-tab" data-bs-toggle="tab" data-bs-target="#quotations"
+                    type="button">
                     Quotations
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button">
+                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers"
+                    type="button">
                     Customers
                 </button>
             </li>
         </ul>
-        
+
         <div class="tab-content mt-3" id="myTabContent">
             <div class="tab-pane fade show active" id="repairs">
-                <table class="table table-striped">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Job Number</th>
@@ -42,16 +46,24 @@
                     </thead>
                     <tbody>
                         {% for repair in repairs %}
-                        <tr>
+                        <tr class="{{ status_colors[repair.status] }}" id="repair-row-{{ repair.id }}">
                             <td>{{ repair.job_number }}</td>
                             <td>{{ repair.customer.name }}</td>
                             <td>{{ repair.laptop_model }}</td>
-                            <td>{{ repair.status }}</td>
-                            <td>{{ repair.created_date.strftime('%Y-%m-%d') }}</td>
                             <td>
+                                <select class="form-select form-select-sm" data-repair-id="{{ repair.id }}">
+                                    {% for status in repair_statuses %}
+                                    <option value="{{ status }}" {% if status == repair.status %}selected{% endif %}>
+                                        {{ status }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>{{ repair.created_date.strftime('%Y-%m-%d') }}</td>
+                            <td class="action-buttons">
                                 <a href="{{ url_for('view_repair', repair_id=repair.id) }}" class="btn btn-sm btn-info">View / Edit</a>
-                                {% if repair.status == 'repaired' %}
-                                <a href="{{ url_for('create_invoice', repair_id=repair.id) }}" class="btn btn-sm btn-success">Create Invoice</a>
+                                {% if repair.status == 'Repaired' %}
+                                <a href="{{ url_for('create_invoice', repair_id=repair.id) }}" class="btn btn-sm btn-success invoice-button">Create Invoice</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -59,20 +71,60 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Similar tables for other tabs -->
-            <div class="tab-pane fade" id="invoices">
-                <!-- Invoices table -->
-            </div>
-            
-            <div class="tab-pane fade" id="quotations">
-                <!-- Quotations table -->
-            </div>
-            
-            <div class="tab-pane fade" id="customers">
-                <!-- Customers table -->
-            </div>
-        </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelects = document.querySelectorAll('.form-select');
+        
+        // Template for the invoice button
+        const createInvoiceButton = (repairId) => `
+            <a href="/repair/${repairId}/invoice" class="btn btn-sm btn-success invoice-button">Create Invoice</a>
+        `;
+        
+        statusSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                const repairId = this.dataset.repairId;
+                const newStatus = this.value;
+                const row = document.getElementById(`repair-row-${repairId}`);
+                const actionCell = row.querySelector('.action-buttons');
+                
+                fetch(`/repair/${repairId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `status=${newStatus}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update row class for color
+                        row.className = data.colorClass;
+                        
+                        // Handle invoice button
+                        const existingInvoiceButton = actionCell.querySelector('.invoice-button');
+                        if (newStatus === 'Repaired') {
+                            if (!existingInvoiceButton) {
+                                actionCell.insertAdjacentHTML('beforeend', ' ' + createInvoiceButton(repairId));
+                            }
+                        } else {
+                            if (existingInvoiceButton) {
+                                existingInvoiceButton.remove();
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update status');
+                    location.reload();  // Reload on error to ensure consistent state
+                });
+            });
+        });
+    });
+    </script>
+{% endblock %}
 {% endblock %}
