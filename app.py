@@ -18,8 +18,15 @@ app = create_app()
 @app.route('/')
 def index():
     repairs = RepairJob.query.order_by(RepairJob.created_date.desc()).all()
+    invoices = RepairInvoice.query.order_by(RepairInvoice.invoice_date.desc()).all()
+    # quotations = Quotation.query.order_by(Quotation.quotation_date.desc()).all()
+    customers = Customer.query.order_by(Customer.created_date.desc()).all()
+    
     return render_template('view_all.html', 
                          repairs=repairs,
+                         invoices=invoices,
+                        #  quotations=quotations,
+                         customers=customers,
                          repair_statuses=REPAIR_STATUSES,
                          status_colors=STATUS_COLORS)
 
@@ -151,6 +158,74 @@ def update_status(repair_id):
             'colorClass': STATUS_COLORS[new_status]
         })
     return jsonify({'success': False}), 400
+
+@app.route('/invoice/<int:invoice_id>')
+def view_invoice(invoice_id):
+    invoice = RepairInvoice.query.get_or_404(invoice_id)
+    return render_template('view_invoice.html', invoice=invoice)
+
+@app.route('/invoice/<int:invoice_id>/update', methods=['POST'])
+def update_invoice(invoice_id):
+    invoice = RepairInvoice.query.get_or_404(invoice_id)
+    
+    if invoice.status == 'paid':
+        flash('Paid invoices cannot be modified')
+        return redirect(url_for('view_invoice', invoice_id=invoice_id))
+    
+    # Update invoice date
+    invoice.invoice_date = datetime.strptime(request.form['invoice_date'], '%Y-%m-%d')
+    
+    # Delete existing repair items
+    for item in invoice.repair_items:
+        db.session.delete(item)
+    
+    # Add new repair items
+    repair_types = request.form.getlist('repair_type[]')
+    repair_notes = request.form.getlist('repair_note[]')
+    warranty_months = request.form.getlist('warranty_months[]')
+    prices = request.form.getlist('price[]')
+    
+    for i in range(len(repair_types)):
+        item = RepairItem(
+            invoice_id=invoice.id,
+            repair_type=repair_types[i],
+            repair_note=repair_notes[i],
+            warranty_months=warranty_months[i],
+            price=prices[i]
+        )
+        db.session.add(item)
+    
+    invoice.total_amount = request.form['total_amount']
+    db.session.commit()
+    flash('Invoice updated successfully!')
+    return redirect(url_for('view_invoice', invoice_id=invoice_id))
+
+@app.route('/invoice/<int:invoice_id>/mark_paid', methods=['POST'])
+def mark_invoice_paid(invoice_id):
+    invoice = RepairInvoice.query.get_or_404(invoice_id)
+    invoice.status = 'paid'
+    invoice.repair_job.status = 'Paid'
+    db.session.commit()
+    flash('Invoice marked as paid successfully!')
+    return redirect(url_for('view_invoice', invoice_id=invoice_id))
+
+@app.route('/invoice/<int:invoice_id>/delete', methods=['POST'])
+def delete_invoice(invoice_id):
+    invoice = RepairInvoice.query.get_or_404(invoice_id)
+    if invoice.status == 'paid':
+        flash('Paid invoices cannot be deleted')
+        return redirect(url_for('view_invoice', invoice_id=invoice_id))
+    
+    db.session.delete(invoice)
+    invoice.repair_job.status = 'Repaired'  # Reset repair job status
+    db.session.commit()
+    flash('Invoice deleted successfully!')
+    return redirect(url_for('index'))
+
+@app.route('/invoice/<int:invoice_id>/print')
+def print_invoice(invoice_id):
+    invoice = RepairInvoice.query.get_or_404(invoice_id)
+    return render_template('print_invoice.html', invoice=invoice)
 
 if __name__ == '__main__':
     app.run(debug=True)
