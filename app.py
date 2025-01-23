@@ -5,12 +5,14 @@ from datetime import datetime
 import random
 import string
 
-REPAIR_STATUSES = ['Open', 'In-Repair', 'Repaired', 'Paid']
+# Update the status constants
+REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', 'paid']  # all possible statuses
+AVAILABLE_REPAIR_STATUSES = ['open', 'In-repair', 'Repaired']  # statuses available for selection
 STATUS_COLORS = {
-    'Open': 'table-warning',
-    'In-Repair': 'table-info',
+    'open': 'table-warning',
+    'In-repair': 'table-info',
     'Repaired': 'table-success',
-    'Paid': 'table-secondary'
+    'paid': 'table-secondary'
 }
 
 app = create_app()
@@ -19,30 +21,26 @@ app = create_app()
 def index():
     repairs = RepairJob.query.order_by(RepairJob.created_date.desc()).all()
     invoices = RepairInvoice.query.order_by(RepairInvoice.invoice_date.desc()).all()
-    # quotations = Quotation.query.order_by(Quotation.quotation_date.desc()).all()
     customers = Customer.query.order_by(Customer.created_date.desc()).all()
     
     return render_template('view_all.html', 
                          repairs=repairs,
                          invoices=invoices,
-                        #  quotations=quotations,
                          customers=customers,
-                         repair_statuses=REPAIR_STATUSES,
+                         repair_statuses=AVAILABLE_REPAIR_STATUSES,  # Changed to use available statuses
                          status_colors=STATUS_COLORS)
 
 @app.route('/repair/new', methods=['GET', 'POST'])
 def new_repair():
     if request.method == 'POST':
-        # First create or get customer
-        customer = Customer.query.filter_by(contact_number=request.form['contact_number']).first()
-        if not customer:
-            customer = Customer(
-                name=request.form['name'],
-                contact_number=request.form['contact_number'],
-                email=request.form['email']
-            )
-            db.session.add(customer)
-            db.session.commit()
+        # Can search for customer by email or contact number here
+        customer = Customer(
+            name=request.form['name'],
+            contact_number=request.form['contact_number'],
+            email=request.form['email']
+        )
+        db.session.add(customer)
+        db.session.commit()
         
         # Create repair job
         repair = RepairJob(
@@ -75,7 +73,7 @@ def view_repair(repair_id):
 def create_invoice(repair_id):
     repair = RepairJob.query.get_or_404(repair_id)
     
-    if repair.status != 'Repaired':
+    if repair.status != 'Repaired':  # Case-sensitive comparison
         flash('Cannot create invoice for job that is not repaired')
         return redirect(url_for('index'))
     
@@ -83,7 +81,8 @@ def create_invoice(repair_id):
         # Create invoice
         invoice = RepairInvoice(
             repair_job_id=repair.id,
-            total_amount=request.form['total_amount']
+            total_amount=request.form['total_amount'],
+            status='pending'  # Set initial invoice status
         )
         db.session.add(invoice)
         db.session.flush()  # Get invoice ID before committing
@@ -104,7 +103,8 @@ def create_invoice(repair_id):
             )
             db.session.add(item)
         
-        repair.status = 'invoiced'
+        # Explicitly maintain the repair status as 'Repaired'
+        repair.status = 'Repaired'  # Ensure status stays as 'Repaired'
         db.session.commit()
         flash('Invoice created successfully!')
         return redirect(url_for('index'))
@@ -150,14 +150,20 @@ def delete_repair(repair_id):
 def update_status(repair_id):
     repair = RepairJob.query.get_or_404(repair_id)
     new_status = request.form.get('status')
-    if new_status in REPAIR_STATUSES:
+    
+    # Prevent changing status if repair is already paid
+    if repair.status == 'paid':
+        return jsonify({'success': False, 'message': 'Cannot modify paid repair status'}), 400
+    
+    # Only allow status changes to available statuses
+    if new_status in AVAILABLE_REPAIR_STATUSES:
         repair.status = new_status
         db.session.commit()
         return jsonify({
             'success': True,
             'colorClass': STATUS_COLORS[new_status]
         })
-    return jsonify({'success': False}), 400
+    return jsonify({'success': False, 'message': 'Invalid status'}), 400
 
 @app.route('/invoice/<int:invoice_id>')
 def view_invoice(invoice_id):
@@ -203,11 +209,21 @@ def update_invoice(invoice_id):
 @app.route('/invoice/<int:invoice_id>/mark_paid', methods=['POST'])
 def mark_invoice_paid(invoice_id):
     invoice = RepairInvoice.query.get_or_404(invoice_id)
-    invoice.status = 'paid'
-    invoice.repair_job.status = 'Paid'
-    db.session.commit()
-    flash('Invoice marked as paid successfully!')
-    return redirect(url_for('view_invoice', invoice_id=invoice_id))
+    
+    try:
+        invoice.status = 'paid'
+        invoice.repair_job.status = 'paid'  # Update repair job status to paid
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'Invoice marked as paid successfully!'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': 'Failed to mark invoice as paid'
+        }), 500
 
 @app.route('/invoice/<int:invoice_id>/delete', methods=['POST'])
 def delete_invoice(invoice_id):

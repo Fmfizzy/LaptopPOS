@@ -52,13 +52,17 @@
                             <td>{{ repair.customer.name }}</td>
                             <td>{{ repair.laptop_model }}</td>
                             <td>
-                                <select class="form-select form-select-sm" data-repair-id="{{ repair.id }}">
-                                    {% for status in repair_statuses %}
-                                    <option value="{{ status }}" {% if status == repair.status %}selected{% endif %}>
-                                        {{ status }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                {% if repair.status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                    <select class="form-select form-select-sm" data-repair-id="{{ repair.id }}">
+                                        {% for status in ['open', 'In-repair', 'Repaired'] %}
+                                        <option value="{{ status }}" {% if status == repair.status %}selected{% endif %}>
+                                            {{ status }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
                             </td>
                             <td>{{ repair.created_date.strftime('%Y-%m-%d') }}</td>
                             <td class="action-buttons">
@@ -198,6 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const newStatus = this.value;
             const row = this.closest('tr');
             
+            // Prevent changing to paid status directly
+            if (newStatus === 'paid') {
+                alert('Status cannot be set to paid directly. Please create and mark an invoice as paid.');
+                return;
+            }
+            
             fetch(`/repair/${repairId}/status`, {
                 method: 'POST',
                 headers: {
@@ -230,6 +240,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 alert('Failed to update status');
                 location.reload();
+            });
+        });
+    });
+
+    // Mark invoice as paid handler
+    const markPaidButtons = document.querySelectorAll('.mark-paid-btn');
+    markPaidButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const invoiceId = this.dataset.invoiceId;
+            
+            fetch(`/invoice/${invoiceId}/mark_paid`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the page to show updated statuses
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to mark invoice as paid');
             });
         });
     });
