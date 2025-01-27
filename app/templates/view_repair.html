@@ -37,6 +37,14 @@
                     <label class="form-label"><strong>Serial Number:</strong></label>
                     <input type="text" class="form-control" name="serial_number" value="{{ repair.serial_number }}">
                 </div>
+                <div class="mb-3">
+                    <label class="form-label"><strong>RAM Model:</strong></label>
+                    <input type="text" class="form-control" name="ram_status" value="{{ repair.ram_status }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"><strong>Battery Model:</strong></label>
+                    <input type="text" class="form-control" name="battery_status" value="{{ repair.battery_status }}">
+                </div>
             </div>
         </div>
 
@@ -52,19 +60,11 @@
                             <input type="text" class="form-control" name="hdd_status" value="{{ repair.hdd_status }}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label"><strong>RAM:</strong></label>
-                            <input type="text" class="form-control" name="ram_status" value="{{ repair.ram_status }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Battery:</strong></label>
-                            <input type="text" class="form-control" name="battery_status" value="{{ repair.battery_status }}">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
                             <label class="form-label"><strong>Keyboard:</strong></label>
                             <input type="text" class="form-control" name="keyboard_status" value="{{ repair.keyboard_status }}">
                         </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>DVD:</strong></label>
                             <input type="text" class="form-control" name="dvd_status" value="{{ repair.dvd_status }}">
@@ -94,6 +94,9 @@
             </div>
             <div>
                 <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                <button type="button" class="btn btn-success me-2" onclick="printRepair()">
+                    <i class="fas fa-print"></i> Print
+                </button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                     Delete Repair
                 </button>
@@ -122,4 +125,10 @@
         </div>
     </div>
 </div>
+
+<script>
+function printRepair() {
+    window.open("{{ url_for('print_repair', repair_id=repair.id) }}", '_blank', 'width=800,height=600');
+}
+</script>
 {% endblock %}

@@ -8,17 +8,19 @@
         </div>
         
         <!-- Search Form -->
-        <div class="card mb-3">
+        <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" name="search" placeholder="Search by customer, model or job number" value="{{ request.args.get('search', '') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        {% if request.args.get('search') %}
-                            <a href="{{ url_for('view_repairs') }}" class="btn btn-secondary">Clear</a>
-                        {% endif %}
+                <form method="GET" class="row justify-content-center align-items-center g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" 
+                                   placeholder="Search by customer, model or job number" 
+                                   value="{{ request.args.get('search', '') }}">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            {% if request.args.get('search') %}
+                                <a href="{{ url_for('view_repairs') }}" class="btn btn-secondary">Clear</a>
+                            {% endif %}
+                        </div>
                     </div>
                 </form>
             </div>
@@ -56,7 +58,7 @@
                     </td>
                     <td>{{ repair.created_date.strftime('%Y-%m-%d') }}</td>
                     <td class="action-buttons">
-                        <a href="{{ url_for('view_repair', repair_id=repair.id) }}" class="btn btn-sm btn-info">View/Edit</a>
+                        <a href="{{ url_for('view_repair', repair_id=repair.id) }}" class="btn btn-sm btn-primary text-white">View/Edit</a>
                         {% if repair.status == 'Repaired' %}
                         <a href="{{ url_for('create_invoice', repair_id=repair.id) }}" class="btn btn-sm btn-success">Create Invoice</a>
                         {% endif %}

@@ -53,11 +53,32 @@ def view_repairs():
 @app.route('/invoices')
 def view_invoices():
     page = request.args.get('page', 1, type=int)
-    pagination = RepairInvoice.query.order_by(RepairInvoice.invoice_date.desc()).paginate(
+    search = request.args.get('search', '')
+    
+    query = RepairInvoice.query
+    
+    if search:
+        # Try to convert search term to float for amount search
+        try:
+            amount_search = float(search)
+            amount_condition = RepairInvoice.total_amount == amount_search
+        except ValueError:
+            amount_condition = False
+            
+        query = query.join(RepairJob).join(Customer).filter(
+            or_(
+                Customer.name.ilike(f'%{search}%'),
+                RepairJob.job_number.ilike(f'%{search}%'),
+                amount_condition
+            )
+        )
+    
+    pagination = query.order_by(RepairInvoice.invoice_date.desc()).paginate(
         page=page,
         per_page=10,
         error_out=False
     )
+    
     return render_template('invoices.html', 
                          invoices=pagination.items,
                          pagination=pagination)
@@ -274,6 +295,11 @@ def delete_invoice(invoice_id):
 def print_invoice(invoice_id):
     invoice = RepairInvoice.query.get_or_404(invoice_id)
     return render_template('print_invoice.html', invoice=invoice)
+
+@app.route('/repair/<int:repair_id>/print')
+def print_repair(repair_id):
+    repair = RepairJob.query.get_or_404(repair_id)
+    return render_template('print_repair.html', repair=repair)
 
 if __name__ == '__main__':
     app.run(debug=True)

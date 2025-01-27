@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Repair Job #{{ repair.job_number }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}">
+</head>
+<body>
+<div class="print-only">
+    <div class="print-header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Company Logo">
+        </div>
+        <div class="company-info">
+            <p>Your Company Name</p>
+            <p>123 Street Name, City, Country</p>
+            <p>Hotline: +1234567890</p>
+            <p>Mobile: +1234567890</p>
+            <p>Email: service@company.com</p>
+        </div>
+    </div>
+
+    <div class="print-content">
+        <table class="print-table">
+            <tr>
+                <td><strong>Customer Name:</strong> {{ repair.customer.name }}</td>
+                <td><strong>Job Number:</strong> {{ repair.id }}</td>
+            </tr>
+            <tr>
+                <td><strong>Contact Number:</strong> {{ repair.customer.contact_number }}</td>
+                <td><strong>Date:</strong> {{ repair.created_date.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Laptop Model:</strong> {{ repair.laptop_model }}</td>
+                <td><strong>Serial Number:</strong> {{ repair.serial_number }}</td>
+            </tr>
+        </table>
+
+        <table class="print-table mt-3">
+            <tr>
+                <th colspan="2">Laptop Details</th>
+            </tr>
+            <tr>
+                <td><strong>RAM:</strong> {{ repair.ram_status }}</td>
+                <td><strong>Battery:</strong> {{ repair.battery_status }}</td>
+            </tr>
+            <tr>
+                <td><strong>HDD:</strong> {{ repair.hdd_status }}</td>
+                <td><strong>DVD:</strong> {{ repair.dvd_status }}</td>
+            </tr>
+            <tr>
+                <td><strong>Keyboard:</strong> {{ repair.keyboard_status }}</td>
+                <td><strong>Display:</strong> {{ repair.display_status }}</td>
+            </tr>
+            <tr>
+                <td><strong>Power:</strong> {{ repair.power_status }}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <strong>Initial Remarks:</strong><br>
+                    {{ repair.initial_remarks }}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

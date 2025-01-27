@@ -91,7 +91,7 @@
                             {% if invoice.status != 'paid' %}
                             <div class="col-md-1">
                                 <label class="form-label">&nbsp;</label>
-                                <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">×</button>
+                                <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">X</button>
                             </div>
                             {% endif %}
                         </div>
@@ -126,9 +126,6 @@
                     Delete Invoice
                 </button>
                 {% endif %}
-                <a href="{{ url_for('print_invoice', invoice_id=invoice.id) }}" class="btn btn-info" target="_blank">
-                    Print Invoice
-                </a>
             </div>
         </div>
     </form>
