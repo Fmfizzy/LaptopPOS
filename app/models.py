@@ -39,11 +39,12 @@ class RepairInvoice(db.Model):
     invoice_date = db.Column(db.DateTime, default=datetime.utcnow)
     total_amount = db.Column(db.Numeric(10, 2))
     status = db.Column(db.String(20), default='pending')  # pending, paid
-    repair_items = db.relationship('RepairItem', backref='invoice', lazy=True)
+    repair_items = db.relationship('RepairItem', backref='invoice', lazy=True,
+                                 cascade='all, delete-orphan')
 
 class RepairItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    invoice_id = db.Column(db.Integer, db.ForeignKey('repair_invoice.id'), nullable=False)
+    invoice_id = db.Column(db.Integer, db.ForeignKey('repair_invoice.id', ondelete='CASCADE'))
     repair_type = db.Column(db.String(100))
     repair_note = db.Column(db.Text)
     warranty_months = db.Column(db.Integer)

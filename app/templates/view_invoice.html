@@ -116,7 +116,10 @@
             <div>
                 {% if invoice.status != 'paid' %}
                 <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#markPaidModal">
+                <button type="button" 
+                        class="btn btn-success me-2" 
+                        data-invoice-id="{{ invoice.id }}"
+                        onclick="markInvoicePaid(this)">
                     Mark as Paid
                 </button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
@@ -129,27 +132,6 @@
             </div>
         </div>
     </form>
-</div>
-
-<!-- Mark as Paid Confirmation Modal -->
-<div class="modal fade" id="markPaidModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to mark this invoice as paid? This action cannot be undone.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ url_for('mark_invoice_paid', invoice_id=invoice.id) }}" method="POST">
-                    <button type="submit" class="btn btn-success">Mark as Paid</button>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -217,6 +199,33 @@ function updateTotal() {
         .map(input => parseFloat(input.value) || 0);
     const total = prices.reduce((sum, price) => sum + price, 0);
     document.getElementById('total_amount').value = total.toFixed(2);
+}
+
+function markInvoicePaid(button) {
+    if (!confirm('Are you sure you want to mark this invoice as paid? This action cannot be undone.')) {
+        return;
+    }
+
+    const invoiceId = button.getAttribute('data-invoice-id');
+    
+    fetch(`/invoice/${invoiceId}/mark_paid`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/';  // Redirect to index page
+        } else {
+            alert('Failed to mark invoice as paid: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while marking the invoice as paid');
+    });
 }
 </script>
 {% endblock %}

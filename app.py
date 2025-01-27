@@ -4,6 +4,7 @@ from app.models import Customer, RepairInvoice, RepairItem, RepairJob
 from datetime import datetime
 import random
 import string
+from sqlalchemy import or_
 
 # Update the status constants
 REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', 'paid']  # all possible statuses
@@ -19,16 +20,47 @@ app = create_app()
 
 @app.route('/')
 def index():
-    repairs = RepairJob.query.order_by(RepairJob.created_date.desc()).all()
-    invoices = RepairInvoice.query.order_by(RepairInvoice.invoice_date.desc()).all()
-    customers = Customer.query.order_by(Customer.created_date.desc()).all()
+    return redirect(url_for('view_repairs'))
+
+@app.route('/repairs')
+def view_repairs():
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '')
     
-    return render_template('view_all.html', 
-                         repairs=repairs,
-                         invoices=invoices,
-                         customers=customers,
-                         repair_statuses=AVAILABLE_REPAIR_STATUSES,  # Changed to use available statuses
+    query = RepairJob.query
+    
+    if search:
+        query = query.join(Customer).filter(
+            or_(
+                Customer.name.ilike(f'%{search}%'),
+                RepairJob.laptop_model.ilike(f'%{search}%'),
+                RepairJob.job_number.ilike(f'%{search}%')
+            )
+        )
+    
+    pagination = query.order_by(RepairJob.created_date.desc()).paginate(
+        page=page,
+        per_page=10,
+        error_out=False
+    )
+    
+    return render_template('repairs.html', 
+                         repairs=pagination.items,
+                         pagination=pagination,
+                         repair_statuses=AVAILABLE_REPAIR_STATUSES,
                          status_colors=STATUS_COLORS)
+
+@app.route('/invoices')
+def view_invoices():
+    page = request.args.get('page', 1, type=int)
+    pagination = RepairInvoice.query.order_by(RepairInvoice.invoice_date.desc()).paginate(
+        page=page,
+        per_page=10,
+        error_out=False
+    )
+    return render_template('invoices.html', 
+                         invoices=pagination.items,
+                         pagination=pagination)
 
 @app.route('/repair/new', methods=['GET', 'POST'])
 def new_repair():
@@ -152,7 +184,7 @@ def update_status(repair_id):
     new_status = request.form.get('status')
     
     # Prevent changing status if repair is already paid
-    if repair.status == 'paid':
+    if (repair.status == 'paid'):
         return jsonify({'success': False, 'message': 'Cannot modify paid repair status'}), 400
     
     # Only allow status changes to available statuses
