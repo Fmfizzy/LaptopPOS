@@ -93,13 +93,19 @@
                 <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to List</a>
             </div>
             <div>
-                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
                 <button type="button" class="btn btn-success me-2" onclick="printRepair()">
                     <i class="fas fa-print"></i> Print
                 </button>
+                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                {% if not repair.invoices %}
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                     Delete Repair
                 </button>
+                {% else %}
+                <button type="button" class="btn btn-danger" disabled title="Cannot delete repair with existing invoices">
+                    Invoice Exist
+                </button>
+                {% endif %}
             </div>
         </div>
     </form>
