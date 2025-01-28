@@ -110,9 +110,8 @@ def new_repair():
         db.session.add(customer)
         db.session.commit()  # This generates the customer.id
         
-        # Now create repair with valid customer_id
         repair = RepairJob(
-            customer_id=customer.id,  # Now we have a valid ID
+            customer_id=customer.id,
             job_number=job_number,
             laptop_model=request.form['laptop_model'],
             serial_number=request.form['serial_number'],

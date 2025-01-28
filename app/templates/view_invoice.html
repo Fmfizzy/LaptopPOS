@@ -19,13 +19,15 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>Job Number:</strong></label>
-                            <input type="text" class="form-control" value="{{ invoice.repair_job.job_number }}" readonly>
+                            <input type="text" class="form-control" value="{{ invoice.repair_job.job_number }}"
+                                readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>Invoice Date:</strong></label>
-                            <input type="date" class="form-control" name="invoice_date" value="{{ invoice.invoice_date.strftime('%Y-%m-%d') }}">
+                            <input type="date" class="form-control" name="invoice_date"
+                                value="{{ invoice.invoice_date.strftime('%Y-%m-%d') }}">
                         </div>
                     </div>
                 </div>
@@ -41,19 +43,22 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>Name:</strong></label>
-                            <input type="text" class="form-control" value="{{ invoice.repair_job.customer.name }}" readonly>
+                            <input type="text" class="form-control" value="{{ invoice.repair_job.customer.name }}"
+                                readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>Contact Number:</strong></label>
-                            <input type="text" class="form-control" value="{{ invoice.repair_job.customer.contact_number }}" readonly>
+                            <input type="text" class="form-control"
+                                value="{{ invoice.repair_job.customer.contact_number }}" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label"><strong>Email:</strong></label>
-                            <input type="email" class="form-control" value="{{ invoice.repair_job.customer.email }}" readonly>
+                            <input type="email" class="form-control" value="{{ invoice.repair_job.customer.email }}"
+                                readonly>
                         </div>
                     </div>
                 </div>
@@ -74,24 +79,31 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <label class="form-label">Repair Type</label>
-                                <input type="text" class="form-control" name="repair_type[]" value="{{ item.repair_type }}" {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                <input type="text" class="form-control" name="repair_type[]"
+                                    value="{{ item.repair_type }}" {% if invoice.status=='paid' %}readonly{% endif %}>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Repair Note</label>
-                                <input type="text" class="form-control" name="repair_note[]" value="{{ item.repair_note }}" {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                <input type="text" class="form-control" name="repair_note[]"
+                                    value="{{ item.repair_note }}" {% if invoice.status=='paid' %}readonly{% endif %}>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Warranty (Months)</label>
-                                <input type="number" class="form-control" name="warranty_months[]" value="{{ item.warranty_months }}" {% if invoice.status == 'paid' %}readonly{% endif %}>
+                                <input type="number" class="form-control" name="warranty_months[]"
+                                    value="{{ item.warranty_months }}" {% if invoice.status=='paid' %}readonly{% endif
+                                    %}>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Price</label>
-                                <input type="number" class="form-control price-input" name="price[]" step="0.01" value="{{ item.price }}" {% if invoice.status == 'paid' %}readonly{% endif %} onchange="updateTotal()">
+                                <input type="number" class="form-control price-input" name="price[]" step="0.01"
+                                    value="{{ item.price }}" {% if invoice.status=='paid' %}readonly{% endif %}
+                                    onchange="updateTotal()">
                             </div>
                             {% if invoice.status != 'paid' %}
                             <div class="col-md-1">
                                 <label class="form-label">&nbsp;</label>
-                                <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">X</button>
+                                <button type="button" class="btn btn-danger form-control"
+                                    onclick="removeRepairItem(this)">X</button>
                             </div>
                             {% endif %}
                         </div>
@@ -103,7 +115,8 @@
                         <strong>Total Amount:</strong>
                     </div>
                     <div class="col-md-2">
-                        <input type="number" class="form-control" id="total_amount" name="total_amount" value="{{ invoice.total_amount }}" readonly>
+                        <input type="number" class="form-control" id="total_amount" name="total_amount"
+                            value="{{ invoice.total_amount }}" readonly>
                     </div>
                 </div>
             </div>
@@ -115,13 +128,14 @@
             </div>
             <div>
                 {% if invoice.status != 'paid' %}
-                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                <button type="button" 
-                        class="btn btn-success me-2" 
-                        data-invoice-id="{{ invoice.id }}"
-                        onclick="markInvoicePaid(this)">
+                <button type="button" class="btn btn-success me-2" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-success me-2" data-invoice-id="{{ invoice.id }}"
+                    onclick="markInvoicePaid(this)">
                     Mark as Paid
                 </button>
+                <button type="submit" class="btn btn-primary me-2">Save Changes</button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                     Delete Invoice
                 </button>
@@ -154,8 +168,8 @@
 
 {% block scripts %}
 <script>
-function addRepairItem() {
-    const template = `
+    function addRepairItem() {
+        const template = `
         <div class="repair-item mb-3">
             <div class="row">
                 <div class="col-md-3">
@@ -181,49 +195,53 @@ function addRepairItem() {
             </div>
         </div>
     `;
-    document.getElementById('repair-items').insertAdjacentHTML('beforeend', template);
-}
-
-function removeRepairItem(button) {
-    if (document.querySelectorAll('.repair-item').length > 1) {
-        button.closest('.repair-item').remove();
-        updateTotal();
-    }
-}
-
-function updateTotal() {
-    const prices = Array.from(document.getElementsByClassName('price-input'))
-        .map(input => parseFloat(input.value) || 0);
-    const total = prices.reduce((sum, price) => sum + price, 0);
-    document.getElementById('total_amount').value = total.toFixed(2);
-}
-
-function markInvoicePaid(button) {
-    if (!confirm('Are you sure you want to mark this invoice as paid? This action cannot be undone.')) {
-        return;
+        document.getElementById('repair-items').insertAdjacentHTML('beforeend', template);
     }
 
-    const invoiceId = button.getAttribute('data-invoice-id');
-    
-    fetch(`/invoice/${invoiceId}/mark_paid`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
+    function removeRepairItem(button) {
+        if (document.querySelectorAll('.repair-item').length > 1) {
+            button.closest('.repair-item').remove();
+            updateTotal();
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = '/';  // Redirect to index page
-        } else {
-            alert('Failed to mark invoice as paid: ' + data.message);
+    }
+
+    function updateTotal() {
+        const prices = Array.from(document.getElementsByClassName('price-input'))
+            .map(input => parseFloat(input.value) || 0);
+        const total = prices.reduce((sum, price) => sum + price, 0);
+        document.getElementById('total_amount').value = total.toFixed(2);
+    }
+
+    function markInvoicePaid(button) {
+        if (!confirm('Are you sure you want to mark this invoice as paid? This action cannot be undone.')) {
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while marking the invoice as paid');
-    });
-}
+
+        const invoiceId = button.getAttribute('data-invoice-id');
+
+        fetch(`/invoice/${invoiceId}/mark_paid`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';  // Redirect to index page
+                } else {
+                    alert('Failed to mark invoice as paid: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while marking the invoice as paid');
+            });
+    }
+
+    function printInvoice() {
+        window.open("{{ url_for('print_invoice', invoice_id=invoice.id) }}", '_blank', 'width=800,height=600');
+    }
 </script>
 {% endblock %}
 {% endblock %}

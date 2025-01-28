@@ -110,6 +110,9 @@
         </div>
     </div>
     
-    <button type="submit" class="btn btn-primary mb-4">Create Repair Job</button>
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ url_for('view_repairs') }}" class="btn btn-secondary">Back to List</a>
+        <button type="submit" class="btn btn-primary">Create Repair Job</button>
+    </div>
 </form>
 {% endblock %}

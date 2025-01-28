@@ -18,11 +18,20 @@
             </div>
         </div>
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <strong>Job No:</strong> {{ repair.job_number }}
+            </div>
+            <div class="col-md-4">
                 <strong>Laptop Model:</strong> {{ repair.laptop_model }}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <strong>Serial Number:</strong> {{ repair.serial_number }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <strong>Initial Remarks:</strong>
+                <p class="mb-0">{{ repair.initial_remarks or 'No initial remarks' }}</p>
             </div>
         </div>
     </div>
@@ -56,7 +65,7 @@
                         </div>
                         <div class="col-md-1">
                             <label class="form-label">&nbsp;</label>
-                            <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">×</button>
+                            <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">X</button>
                         </div>
                     </div>
                 </div>
@@ -71,7 +80,10 @@
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Create Invoice</button>
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ url_for('view_repairs') }}" class="btn btn-secondary">Back to List</a>
+        <button type="submit" class="btn btn-primary">Create Invoice</button>
+    </div>
 </form>
 
 <script>
