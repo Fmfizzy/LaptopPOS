@@ -67,3 +67,8 @@ class QuotationItem(db.Model):
     quantity = db.Column(db.Integer)
     unit_price = db.Column(db.Numeric(10, 2))
     total_price = db.Column(db.Numeric(10, 2))
+
+class JobCounter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    year_month = db.Column(db.String(4), unique=True)  # Format: YYMM
+    last_number = db.Column(db.Integer, default=0)

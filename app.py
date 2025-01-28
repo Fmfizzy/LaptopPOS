@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from app import create_app, db
-from app.models import Customer, RepairInvoice, RepairItem, RepairJob
+from app.models import Customer, RepairInvoice, RepairItem, RepairJob, JobCounter
 from datetime import datetime
 import random
 import string
@@ -86,19 +86,34 @@ def view_invoices():
 @app.route('/repair/new', methods=['GET', 'POST'])
 def new_repair():
     if request.method == 'POST':
-        # Can search for customer by email or contact number here
+        # Get current year-month
+        current_ym = datetime.now().strftime("%y%m")
+        
+        # Get or create counter for current month
+        counter = JobCounter.query.filter_by(year_month=current_ym).first()
+        if not counter:
+            counter = JobCounter(year_month=current_ym, last_number=0)
+            db.session.add(counter)
+        
+        # Increment counter
+        counter.last_number += 1
+        
+        # Create job number
+        job_number = f'JOB{current_ym}{counter.last_number:03d}'
+        
+        # Create and commit customer first to get ID
         customer = Customer(
             name=request.form['name'],
             contact_number=request.form['contact_number'],
             email=request.form['email']
         )
         db.session.add(customer)
-        db.session.commit()
+        db.session.commit()  # This generates the customer.id
         
-        # Create repair job
+        # Now create repair with valid customer_id
         repair = RepairJob(
-            customer_id=customer.id,
-            job_number=f'JOB{datetime.now().strftime("%y%m")}{random.randint(1000,9999)}',
+            customer_id=customer.id,  # Now we have a valid ID
+            job_number=job_number,
             laptop_model=request.form['laptop_model'],
             serial_number=request.form['serial_number'],
             hdd_status=request.form['hdd_status'],
@@ -112,6 +127,7 @@ def new_repair():
         )
         db.session.add(repair)
         db.session.commit()
+        
         flash('Repair job created successfully!')
         return redirect(url_for('index'))
     
