@@ -1,10 +1,16 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
-from app import create_app, db
-from app.models import Customer, RepairInvoice, RepairItem, RepairJob, JobCounter
-from datetime import datetime
+import os
+import sys
+import time
 import random
 import string
+import logging
+import threading
+import webbrowser
+from datetime import datetime
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from sqlalchemy import or_
+from app import create_app, db
+from app.models import Customer, RepairInvoice, RepairItem, RepairJob, JobCounter
 
 # Update the status constants
 REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', 'paid']  # all possible statuses
@@ -317,4 +323,28 @@ def print_repair(repair_id):
     return render_template('print_repair.html', repair=repair)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Suppress Flask development server warnings
+    cli = sys.modules['flask.cli']
+    cli.show_server_banner = lambda *args, **kwargs: None
+    logging.getLogger('werkzeug').disabled = True
+    
+    def open_browser():
+        """Open browser after a short delay"""
+        time.sleep(2)
+        try:
+            webbrowser.open('http://127.0.0.1:5000')
+        except:
+            try:
+                os.system('start http://127.0.0.1:5000')
+            except:
+                pass
+
+    # Start browser in background thread
+    threading.Thread(target=open_browser, daemon=True).start()
+    
+    # Run Flask app
+    app.run(
+        host='127.0.0.1',
+        port=5000,
+        debug=False
+    )

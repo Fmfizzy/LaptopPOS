@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Repair Job #{{ repair.job_number }}</title>
+    <style>
+        body { font-size: 13px; }
+        .print-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: flex-start;  /* Align items to top */
+            padding-top: 0;  /* Remove top padding */
+        }
+        .logo { 
+            width: 45%;
+            text-align: left;     /* Changed from center */
+            margin-left: -25px;   /* Increased left margin */
+            margin-top: -10px;
+            padding-left: 10px;   /* Added padding to offset margin slightly */
+        }
+        .logo img { 
+            max-width: 130px;
+            height: auto;
+            display: block;      /* Make image block level */
+            margin-left: 15px;   /* Add specific margin to image */
+        }
+        .logo h2 {
+            margin: 2px 16px;
+            font-size: 1.1em;
+            text-align: left; 
+            font-family: Arial, 'Helvetica Neue', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .logo-text-1 {
+            margin-left: 40px !important;  /* Override default h2 margin */
+            color: #333;
+        }
+        .logo-text-2 {
+            margin-left: 20px !important;
+            color: #444;
+        }
+        .company-info {
+            width: 40%;
+            text-align: right;
+            font-size: 0.85em;
+            line-height: 1.2;
+        }
+        .company-info p {
+            margin: 0;
+            padding: 0;
+        }
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.8em;
+            table-layout: fixed;
+        }
+        .print-table td {
+            padding: 4px;
+            border: 1px solid #000;
+        }
+        .print-table td:nth-child(odd) {
+            width: 20%; 
+        }
+        .print-table td:nth-child(even) {
+            width: 30%;
+        }
+        .title {
+            text-align: center;
+            margin: 15px 0 20px 0;
+        }
+        .title h1 {
+            font-size: 1.4em;
+            text-decoration: underline;
+            margin: 0;
+            font-weight: bold;
+        }
+        .laptop-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 50px; 
+            font-size: 0.9em;  /* Kept original size */
+        }
+        .laptop-details th, .laptop-details td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+        .laptop-details th {
+            background-color: #f0f0f0;
+        }
+        .laptop-details td:first-child {
+            width: 25%;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            font-size: 0.9em;
+        }
+        .signature-line {
+            width: 45%;
+            border-top: 1px dotted #000;
+            padding-top: 5px;
+            text-align: center;
+        }
+        .warranty {
+            font-size: 0.75em;
+            border: 1px solid #000;
+            padding: 8px;
+        }
+        .warranty h4 {
+            margin: 0 0 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="print-only">
+    <div class="print-header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/Nano-Logo.png') }}" alt="Nano Logo">
+            <h2 class="logo-text-1">Technology</h2>
+            <h2 class="logo-text-2">Laptop Repairing</h2>
+        </div>
+        <div class="company-info">
+            <p>No. 54/A, Cyril Janz mawatha, Panadura</p>
+            <p>Hotline: 0756 958 958</p>
+            <p>Mobile: 0777 989 017</p>
+            <p>Email: proboda.pm@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="title">
+        <h1>REPAIR NOTE</h1>
+    </div>
+
+    <table class="print-table">
+        <tr>
+            <td><strong>Customer Name:</strong></td><td>{{ repair.customer.name }}</td>
+            <td><strong>Job Number:</strong></td><td>{{ repair.job_number }}</td>
+        </tr>
+        <tr>
+            <td><strong>Contact No:</strong> </td><td>{{ repair.customer.contact_number }}</td>
+            <td><strong>Laptop Model:</strong> </td><td> {{ repair.laptop_model }}</td>
+        </tr>
+        <tr>
+            <td><strong>Date:</strong> </td><td> {{ repair.created_date.strftime('%Y-%m-%d') }}</td>
+            <td><strong>Serial Number:</strong> </td><td> {{ repair.serial_number }}</td>
+        </tr>
+    </table>
+
+    <table class="laptop-details">
+        <tr>
+            <th>Details</th>
+            <th>Status/Model</th>
+        </tr>
+        <tr>
+            <td>RAM</td>
+            <td>{{ repair.ram_status }}</td>
+        </tr>
+        <tr>
+            <td>Battery</td>
+            <td>{{ repair.battery_status }}</td>
+        </tr>
+        <tr>
+            <td>HDD</td>
+            <td>{{ repair.hdd_status }}</td>
+        </tr>
+        <tr>
+            <td>DVD</td>
+            <td>{{ repair.dvd_status }}</td>
+        </tr>
+        <tr>
+            <td>Keyboard</td>
+            <td>{{ repair.keyboard_status }}</td>
+        </tr>
+        <tr>
+            <td>Display</td>
+            <td>{{ repair.display_status }}</td>
+        </tr>
+        <tr>
+            <td>Power</td>
+            <td>{{ repair.power_status }}</td>
+        </tr>
+        <tr>
+            <td>Initial Remarks</td>
+            <td>{{ repair.initial_remarks }}</td>
+        </tr>
+    </table>
+
+    <div class="signatures">
+        <div class="signature-line">
+            <p>Authorized Signature</p>
+        </div>
+        <div class="signature-line">
+            <p>Received By</p>
+        </div>
+    </div>
+
+    <div class="warranty">
+        <h4>Warranty Conditions:</h4>
+        <div>
+            <p>(12 Months = 350 Days, 24 Monnths = 700 Days, 34 Months = 1050 Days, N/W = No Warranty)</p>
+            <p> The warranty covers only manufacturing defects. Damage or defects caused by other factors, 
+                such as negligence, misuse, improper operation, power fluctuations, lightning or other 
+                natural disasters, sabotage, or accidents, are NOT included under this warranty. Repairs or 
+                replacements necessitated by such causes, which are not covered under the warranty, will 
+                incur charges for labor, time, and materials.
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    window.onload = function() {
+        window.print();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!--  app/templates/new_repair.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>New Repair Job</h2>
+<form method="post">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Customer Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="name" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="contact_number" class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="contact_number" name="contact_number" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Laptop Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="laptop_model" class="form-label">Laptop Model</label>
+                    <input type="text" class="form-control" id="laptop_model" name="laptop_model" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="serial_number" class="form-label">Serial Number</label>
+                    <input type="text" class="form-control" id="serial_number" name="serial_number" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ram_status" class="form-label">RAM Model</label>
+                    <input type="text" class="form-control" id="ram_status" name="ram_status" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="battery_status" class="form-label">Battery Model</label>
+                    <input type="text" class="form-control" id="battery_status" name="battery_status" required>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Component Status</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="hdd_status" class="form-label">HDD Status</label>
+                    <select class="form-select" id="hdd_status" name="hdd_status" required>
+                        <option value="Working">Working</option>
+                        <option value="Not Working">Not Working</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="keyboard_status" class="form-label">Keyboard Status</label>
+                    <select class="form-select" id="keyboard_status" name="keyboard_status" required>
+                        <option value="Working">Working</option>
+                        <option value="Not Working">Not Working</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="dvd_status" class="form-label">DVD Status</label>
+                    <select class="form-select" id="dvd_status" name="dvd_status" required>
+                        <option value="Working">Working</option>
+                        <option value="Not Working">Not Working</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="display_status" class="form-label">Display Status</label>
+                    <select class="form-select" id="display_status" name="display_status" required>
+                        <option value="Working">Working</option>
+                        <option value="Not Working">Not Working</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="power_status" class="form-label">Power Status</label>
+                    <select class="form-select" id="power_status" name="power_status" required>
+                        <option value="Working">Working</option>
+                        <option value="Not Working">Not Working</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <label for="initial_remarks" class="form-label">Initial Remarks</label>
+                    <textarea class="form-control" id="initial_remarks" name="initial_remarks" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ url_for('view_repairs') }}" class="btn btn-secondary">Back to List</a>
+        <button type="submit" class="btn btn-primary">Create Repair Job</button>
+    </div>
+</form>
+{% endblock %}
