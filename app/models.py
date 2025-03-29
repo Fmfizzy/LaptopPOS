@@ -18,7 +18,7 @@ class RepairJob(db.Model):
     created_date = db.Column(db.DateTime, default=datetime.utcnow)
     laptop_model = db.Column(db.String(100))
     serial_number = db.Column(db.String(100))
-    status = db.Column(db.String(20), default='open')  # open, in-repair, repaired, completed
+    status = db.Column(db.String(20), default='open')  # open, in-repair, repaired, completed, can't-repair
     
     # Status checks
     hdd_status = db.Column(db.String(50))
@@ -28,6 +28,7 @@ class RepairJob(db.Model):
     dvd_status = db.Column(db.String(50))
     display_status = db.Column(db.String(50))
     power_status = db.Column(db.String(50))
+    ssd_status = db.Column(db.String(50))  # Add this line
     
     initial_remarks = db.Column(db.Text)
     last_updated = db.Column(db.DateTime, onupdate=datetime.utcnow)

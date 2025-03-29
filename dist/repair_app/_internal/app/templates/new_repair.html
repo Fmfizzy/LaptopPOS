@@ -43,11 +43,11 @@
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="ram_status" class="form-label">RAM Model</label>
+                    <label for="ram_status" class="form-label">RAM Serial</label>
                     <input type="text" class="form-control" id="ram_status" name="ram_status" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="battery_status" class="form-label">Battery Model</label>
+                    <label for="battery_status" class="form-label">Battery Serial</label>
                     <input type="text" class="form-control" id="battery_status" name="battery_status" required>
                 </div>
             </div>
@@ -62,49 +62,33 @@
             <div class="row">
                 <div class="col-md-3 mb-3">
                     <label for="hdd_status" class="form-label">HDD Status</label>
-                    <select class="form-select" id="hdd_status" name="hdd_status" required>
-                        <option value="Working">Working</option>
-                        <option value="Not Working">Not Working</option>
-                        <option value="N/A">N/A</option>
-                    </select>
+                    <input type="text" class="form-control" id="hdd_status" name="hdd_status" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="keyboard_status" class="form-label">Keyboard Status</label>
-                    <select class="form-select" id="keyboard_status" name="keyboard_status" required>
-                        <option value="Working">Working</option>
-                        <option value="Not Working">Not Working</option>
-                        <option value="N/A">N/A</option>
-                    </select>
+                    <input type="text" class="form-control" id="keyboard_status" name="keyboard_status" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="dvd_status" class="form-label">DVD Status</label>
-                    <select class="form-select" id="dvd_status" name="dvd_status" required>
-                        <option value="Working">Working</option>
-                        <option value="Not Working">Not Working</option>
-                        <option value="N/A">N/A</option>
-                    </select>
+                    <input type="text" class="form-control" id="dvd_status" name="dvd_status" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="display_status" class="form-label">Display Status</label>
-                    <select class="form-select" id="display_status" name="display_status" required>
-                        <option value="Working">Working</option>
-                        <option value="Not Working">Not Working</option>
-                        <option value="N/A">N/A</option>
-                    </select>
+                    <input type="text" class="form-control" id="display_status" name="display_status" value="Not Checked" required>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label for="power_status" class="form-label">Power Status</label>
-                    <select class="form-select" id="power_status" name="power_status" required>
-                        <option value="Working">Working</option>
-                        <option value="Not Working">Not Working</option>
-                        <option value="N/A">N/A</option>
-                    </select>
+                    <label for="power_status" class="form-label">Power pack</label>
+                    <input type="text" class="form-control" id="power_status" name="power_status" value="No" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="ssd_status" class="form-label">SSD</label>
+                    <input type="text" class="form-control" id="ssd_status" name="ssd_status" value="No" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col-12">
                     <label for="initial_remarks" class="form-label">Initial Remarks</label>
-                    <textarea class="form-control" id="initial_remarks" name="initial_remarks" rows="2"></textarea>
+                    <textarea class="form-control" id="initial_remarks" name="initial_remarks" rows="2" required></textarea>
                 </div>
             </div>
         </div>

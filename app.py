@@ -13,13 +13,14 @@ from app import create_app, db
 from app.models import Customer, RepairInvoice, RepairItem, RepairJob, JobCounter
 
 # Update the status constants
-REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', 'paid']  # all possible statuses
-AVAILABLE_REPAIR_STATUSES = ['open', 'In-repair', 'Repaired']  # statuses available for selection
+REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', 'paid', "can't-repair"]  # all possible statuses
+AVAILABLE_REPAIR_STATUSES = ['open', 'In-repair', 'Repaired', "can't-repair"]  # statuses available for selection
 STATUS_COLORS = {
     'open': 'table-warning',
     'In-repair': 'table-info',
     'Repaired': 'table-success',
-    'paid': 'table-secondary'
+    'paid': 'table-secondary',
+    "can't-repair": 'table-danger'
 }
 
 app = create_app()
@@ -32,6 +33,7 @@ def index():
 def view_repairs():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
+    active_only = request.args.get('active_only')
     
     query = RepairJob.query
     
@@ -43,6 +45,9 @@ def view_repairs():
                 RepairJob.job_number.ilike(f'%{search}%')
             )
         )
+    
+    if active_only:
+        query = query.filter(RepairJob.status.in_(['open', 'In-repair']))
     
     pagination = query.order_by(RepairJob.created_date.desc()).paginate(
         page=page,
@@ -60,6 +65,7 @@ def view_repairs():
 def view_invoices():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
+    unpaid_only = request.args.get('unpaid_only')
     
     query = RepairInvoice.query
     
@@ -78,6 +84,9 @@ def view_invoices():
                 amount_condition
             )
         )
+    
+    if unpaid_only:
+        query = query.filter(RepairInvoice.status == 'pending')
     
     pagination = query.order_by(RepairInvoice.invoice_date.desc()).paginate(
         page=page,
@@ -128,6 +137,7 @@ def new_repair():
             dvd_status=request.form['dvd_status'],
             display_status=request.form['display_status'],
             power_status=request.form['power_status'],
+            ssd_status=request.form['ssd_status'],  # Add this line
             initial_remarks=request.form['initial_remarks']
         )
         db.session.add(repair)
@@ -206,6 +216,7 @@ def update_repair(repair_id):
     repair.dvd_status = request.form['dvd_status']
     repair.display_status = request.form['display_status']
     repair.power_status = request.form['power_status']
+    repair.ssd_status = request.form['ssd_status']  # Add this line
     repair.initial_remarks = request.form['initial_remarks']
     
     db.session.commit()

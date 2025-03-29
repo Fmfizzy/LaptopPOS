@@ -127,10 +127,10 @@
                 <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to List</a>
             </div>
             <div>
-                {% if invoice.status != 'paid' %}
                 <button type="button" class="btn btn-success me-2" onclick="printInvoice()">
                     <i class="fas fa-print"></i> Print
                 </button>
+                {% if invoice.status != 'paid' %}
                 <button type="button" class="btn btn-success me-2" data-invoice-id="{{ invoice.id }}"
                     onclick="markInvoicePaid(this)">
                     Mark as Paid

@@ -22,6 +22,16 @@
                             {% endif %}
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('view_invoices', unpaid_only='1') if not request.args.get('unpaid_only') else url_for('view_invoices') }}" 
+                           class="btn btn-outline-primary {% if request.args.get('unpaid_only') %}active{% endif %}">
+                            {% if request.args.get('unpaid_only') %}
+                                Show All Invoices
+                            {% else %}
+                                Show Unpaid Only
+                            {% endif %}
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -62,19 +72,19 @@
         <nav aria-label="Invoices pagination">
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('view_invoices', page=pagination.prev_num, search=request.args.get('search', '')) if pagination.has_prev else '#' }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('view_invoices', page=pagination.prev_num, search=request.args.get('search', ''), unpaid_only=request.args.get('unpaid_only', '')) if pagination.has_prev else '#' }}">Previous</a>
                 </li>
                 {% for page in pagination.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
                     {% if page %}
                         <li class="page-item {% if page == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('view_invoices', page=page, search=request.args.get('search', '')) }}">{{ page }}</a>
+                            <a class="page-link" href="{{ url_for('view_invoices', page=page, search=request.args.get('search', ''), unpaid_only=request.args.get('unpaid_only', '')) }}">{{ page }}</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><span class="page-link">...</span></li>
                     {% endif %}
                 {% endfor %}
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('view_invoices', page=pagination.next_num, search=request.args.get('search', '')) if pagination.has_next else '#' }}">Next</a>
+                    <a class="page-link" href="{{ url_for('view_invoices', page=pagination.next_num, search=request.args.get('search', ''), unpaid_only=request.args.get('unpaid_only', '')) if pagination.has_next else '#' }}">Next</a>
                 </li>
             </ul>
         </nav>

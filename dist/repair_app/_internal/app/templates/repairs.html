@@ -22,6 +22,16 @@
                             {% endif %}
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('view_repairs', active_only='1') if not request.args.get('active_only') else url_for('view_repairs') }}" 
+                           class="btn btn-outline-primary {% if request.args.get('active_only') %}active{% endif %}">
+                            {% if request.args.get('active_only') %}
+                                Show All Repairs
+                            {% else %}
+                                Show Active Repairs Only
+                            {% endif %}
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -48,7 +58,7 @@
                             <span class="badge bg-success">Paid</span>
                         {% else %}
                             <select class="form-select form-select-sm" data-repair-id="{{ repair.id }}">
-                                {% for status in ['open', 'In-repair', 'Repaired'] %}
+                                {% for status in ['open', 'In-repair', 'Repaired', "can't-repair"] %}
                                 <option value="{{ status }}" {% if status == repair.status %}selected{% endif %}>
                                     {{ status }}
                                 </option>
@@ -72,19 +82,19 @@
         <nav aria-label="Repair jobs pagination">
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('view_repairs', page=pagination.prev_num, search=request.args.get('search', '')) if pagination.has_prev else '#' }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('view_repairs', page=pagination.prev_num, search=request.args.get('search', ''), active_only=request.args.get('active_only', '')) if pagination.has_prev else '#' }}">Previous</a>
                 </li>
                 {% for page in pagination.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
                     {% if page %}
                         <li class="page-item {% if page == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('view_repairs', page=page, search=request.args.get('search', '')) }}">{{ page }}</a>
+                            <a class="page-link" href="{{ url_for('view_repairs', page=page, search=request.args.get('search', ''), active_only=request.args.get('active_only', '')) }}">{{ page }}</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><span class="page-link">...</span></li>
                     {% endif %}
                 {% endfor %}
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('view_repairs', page=pagination.next_num, search=request.args.get('search', '')) if pagination.has_next else '#' }}">Next</a>
+                    <a class="page-link" href="{{ url_for('view_repairs', page=pagination.next_num, search=request.args.get('search', ''), active_only=request.args.get('active_only', '')) if pagination.has_next else '#' }}">Next</a>
                 </li>
             </ul>
         </nav>
