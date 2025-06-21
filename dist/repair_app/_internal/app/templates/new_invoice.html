@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>New Invoice</h2>
+<form method="post">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Customer Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="name" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="contact_number" class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="contact_number" name="contact_number" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Items to be Sold</h5>
+            <button type="button" class="btn btn-sm btn-primary" onclick="addRepairItem()">Add Item</button>
+        </div>
+        <div class="card-body">
+            <div id="repair-items">
+                <div class="repair-item mb-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Item Name</label>
+                            <input type="text" class="form-control" name="repair_type[]"  required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Item Description</label>
+                            <input type="text" class="form-control" name="repair_note[]" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Warranty (Months)</label>
+                            <input type="number" class="form-control" name="warranty_months[]" value="0" min="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Price</label>
+                            <input type="number" class="form-control price-input" name="price[]" step="0.01" required onchange="updateTotal()">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-danger form-control" onclick="removeRepairItem(this)">X</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-9 text-end">
+                    <strong>Total Amount:</strong>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="total_amount" name="total_amount" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ url_for('view_invoices') }}" class="btn btn-secondary">Back to List</a>
+        <button type="submit" class="btn btn-primary">Create Invoice</button>
+    </div>
+</form>
+
+<script>
+function addRepairItem() {
+    const template = document.querySelector('.repair-item').cloneNode(true);
+    template.querySelector('.price-input').value = '';
+    document.getElementById('repair-items').appendChild(template);
+}
+
+function removeRepairItem(button) {
+    if (document.querySelectorAll('.repair-item').length > 1) {
+        button.closest('.repair-item').remove();
+        updateTotal();
+    }
+}
+
+function updateTotal() {
+    const prices = Array.from(document.getElementsByClassName('price-input'))
+        .map(input => parseFloat(input.value) || 0);
+    const total = prices.reduce((sum, price) => sum + price, 0);
+    document.getElementById('total_amount').value = total.toFixed(2);
+}
+</script>
+{% endblock %}

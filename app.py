@@ -29,6 +29,66 @@ app = create_app()
 def index():
     return redirect(url_for('view_repairs'))
 
+@app.route('/invoice/new', methods=['GET', 'POST'])
+def new_invoice():
+    if request.method == 'POST':
+        # Create customer first
+        customer = Customer(
+            name=request.form['name'],
+            contact_number=request.form['contact_number'],
+            email=request.form['email']
+        )
+        db.session.add(customer)
+        db.session.commit()
+
+        # Create repair job with minimal info (no laptop fields)
+        current_ym = datetime.now().strftime("%y%m")
+        counter = JobCounter.query.filter_by(year_month=current_ym).first()
+        if not counter:
+            counter = JobCounter(year_month=current_ym, last_number=0)
+            db.session.add(counter)
+        counter.last_number += 1
+        job_number = f'JOB{current_ym}{counter.last_number:03d}'
+
+        repair = RepairJob(
+            customer_id=customer.id,
+            job_number=job_number,
+            status='Repaired'
+        )
+        db.session.add(repair)
+        db.session.flush()
+
+        # Create invoice
+        invoice = RepairInvoice(
+            repair_job_id=repair.id,
+            total_amount=request.form['total_amount'],
+            status='pending'
+        )
+        db.session.add(invoice)
+        db.session.flush()
+
+        # Add repair items
+        repair_types = request.form.getlist('repair_type[]')
+        repair_notes = request.form.getlist('repair_note[]')
+        warranty_months = request.form.getlist('warranty_months[]')
+        prices = request.form.getlist('price[]')
+        
+        for i in range(len(repair_types)):
+            item = RepairItem(
+                invoice_id=invoice.id,
+                repair_type=repair_types[i],
+                repair_note=repair_notes[i],
+                warranty_months=warranty_months[i],
+                price=prices[i]
+            )
+            db.session.add(item)
+
+        db.session.commit()
+        flash('Invoice created successfully!')
+        return redirect(url_for('view_invoice', invoice_id=invoice.id))
+    
+    return render_template('new_invoice.html', today=datetime.now())
+
 @app.route('/repairs')
 def view_repairs():
     page = request.args.get('page', 1, type=int)
@@ -326,6 +386,9 @@ def delete_invoice(invoice_id):
 @app.route('/invoice/<int:invoice_id>/print')
 def print_invoice(invoice_id):
     invoice = RepairInvoice.query.get_or_404(invoice_id)
+    # If the invoice's repair_job has no laptop_model, treat as item invoice
+    if not invoice.repair_job.laptop_model:
+        return render_template('print_item_invoice.html', invoice=invoice)
     return render_template('print_invoice.html', invoice=invoice)
 
 @app.route('/repair/<int:repair_id>/print')

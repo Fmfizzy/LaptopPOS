@@ -65,7 +65,7 @@
  [],
  False,
  False,
- 1743232055,
+ 1750503252,
  [('run.exe',
    'J:\\Code\\Laptop_POS\\LaptopPOS\\venv\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],

@@ -49,6 +49,7 @@
             </thead>
             <tbody>
                 {% for repair in repairs %}
+                {% if repair.laptop_model %}
                 <tr class="{{ status_colors[repair.status] }}" id="repair-row-{{ repair.id }}">
                     <td>{{ repair.job_number }}</td>
                     <td>{{ repair.customer.name }}</td>
@@ -74,6 +75,7 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
