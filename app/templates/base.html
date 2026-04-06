@@ -1,4 +1,3 @@
-<!-- # app/templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,26 +5,158 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptop POS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background: #111111;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0.6rem 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+        }
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .brand-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .brand-sub {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-link-custom {
+            color: rgba(255,255,255,0.7) !important;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.45rem 0.85rem !important;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-link-custom i {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        .nav-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(255,255,255,0.12);
+            margin: 0 6px;
+            align-self: center;
+        }
+        .btn-nav-primary {
+            background: #4361ee;
+            border: none;
+            color: #fff !important;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem !important;
+            border-radius: 6px;
+            transition: background 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-nav-primary:hover {
+            background: #3451d1;
+            transform: translateY(-1px);
+        }
+        .btn-nav-success {
+            background: #2ecc71;
+            border: none;
+            color: #fff !important;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem !important;
+            border-radius: 6px;
+            transition: background 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-nav-success:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+        .alert { border-radius: 8px; }
+    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand" href="/">Nano Technology POS</a>            <div class="navbar-nav">
-                <a class="nav-link" href="{{ url_for('view_repairs') }}">Repair Jobs</a>
-                <a class="nav-link" href="{{ url_for('view_invoices') }}">Invoices</a>
-                <a class="nav-link btn btn-primary ms-2" href="{{ url_for('new_repair') }}">New Repair +</a>
-                <a class="nav-link btn btn-success ms-2" href="{{ url_for('new_invoice') }}">New Invoice +</a>
+            <a class="navbar-brand-custom me-4" href="/">
+                <div class="brand-text">
+                    <span class="brand-name">Nano Technology</span>
+                    <span class="brand-sub">Point of Sale</span>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <div class="navbar-nav me-auto gap-1">
+                    <a class="nav-link-custom" href="{{ url_for('view_repairs') }}">
+                        <i class="bi bi-wrench-adjustable"></i> Repairs
+                    </a>
+                    <a class="nav-link-custom" href="{{ url_for('view_invoices') }}">
+                        <i class="bi bi-receipt"></i> Invoices
+                    </a>
+                    <a class="nav-link-custom" href="{{ url_for('view_sales') }}">
+                        <i class="bi bi-bar-chart-line"></i> Sales
+                    </a>
+                </div>
+                <div class="navbar-nav gap-2">
+                    <div class="nav-divider d-none d-lg-block"></div>
+                    <a class="nav-link-custom btn-nav-primary" href="{{ url_for('new_repair') }}">
+                        <i class="bi bi-plus-lg"></i> New Repair
+                    </a>
+                    <a class="nav-link-custom btn-nav-success" href="{{ url_for('new_invoice') }}">
+                        <i class="bi bi-plus-lg"></i> New Invoice
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-    
+
     <div class="container mt-4">
         {% for message in get_flashed_messages() %}
-            <div class="alert alert-info">{{ message }}</div>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="bi bi-info-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         {% endfor %}
         {% block content %}{% endblock %}
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Highlight active nav link based on current path
+        document.querySelectorAll('.nav-link-custom[href]').forEach(link => {
+            if (link.getAttribute('href') !== '/' && window.location.pathname.startsWith(link.getAttribute('href'))) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

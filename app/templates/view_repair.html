@@ -100,8 +100,25 @@
             </div>
             <div>
                 <button type="button" class="btn btn-success me-2" onclick="printRepair()">
-                    <i class="fas fa-print"></i> Print
+                    <i class="bi bi-printer"></i> Print
                 </button>
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-share"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="shareWhatsApp(); return false;">
+                                <i class="bi bi-whatsapp text-success"></i> WhatsApp
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="shareEmail(); return false;">
+                                <i class="bi bi-envelope text-primary"></i> Email
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <button type="submit" class="btn btn-primary me-2">Save Changes</button>
                 {% if not repair.invoices %}
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
@@ -141,6 +158,38 @@
 <script>
 function printRepair() {
     window.open("{{ url_for('print_repair', repair_id=repair.id) }}", '_blank', 'width=800,height=600');
+}
+
+function formatPhone(number) {
+    let digits = number.replace(/\D/g, '');
+    if (digits.startsWith('0')) {
+        digits = '60' + digits.slice(1);
+    }
+    return digits;
+}
+
+function shareWhatsApp() {
+    const phone = formatPhone('{{ repair.customer.contact_number }}');
+    const name = '{{ repair.customer.name }}';
+    const jobNo = '{{ repair.job_number }}';
+    const model = '{{ repair.laptop_model or "your device" }}';
+    const msg = encodeURIComponent(
+        'Hi ' + name + ', this is an update on your repair job ' + jobNo + ' (' + model + ') at Nano Technology. ' +
+        'Please find the attached job sheet for your records.'
+    );
+    window.open('https://wa.me/' + phone + '?text=' + msg, '_blank');
+}
+
+function shareEmail() {
+    const email = '{{ repair.customer.email }}';
+    const subject = encodeURIComponent('Repair Job {{ repair.job_number }} - Nano Technology');
+    const body = encodeURIComponent(
+        'Hi {{ repair.customer.name }},\n\n' +
+        'Please find attached the job sheet for your repair job {{ repair.job_number }}.\n\n' +
+        'Thank you for choosing Nano Technology.\n\n' +
+        'Regards,\nNano Technology'
+    );
+    window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
 }
 </script>
 {% endblock %}

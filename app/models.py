@@ -39,6 +39,7 @@ class RepairInvoice(db.Model):
     repair_job_id = db.Column(db.Integer, db.ForeignKey('repair_job.id'), nullable=False)
     invoice_date = db.Column(db.DateTime, default=datetime.utcnow)
     total_amount = db.Column(db.Numeric(10, 2))
+    advance_payment = db.Column(db.Numeric(10, 2), default=0)
     status = db.Column(db.String(20), default='pending')  # pending, paid
     repair_items = db.relationship('RepairItem', backref='invoice', lazy=True,
                                  cascade='all, delete-orphan')
@@ -73,3 +74,22 @@ class JobCounter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     year_month = db.Column(db.String(4), unique=True)  # Format: YYMM
     last_number = db.Column(db.Integer, default=0)
+
+class Sale(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey('repair_invoice.id'), nullable=False)
+    sale_date = db.Column(db.DateTime, default=datetime.utcnow)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    payment_method = db.Column(db.String(20), nullable=False)  # 'cash' or 'bank'
+    transferred_to_bank = db.Column(db.Boolean, default=False)  # for cash sales moved to bank
+    invoice = db.relationship('RepairInvoice', backref='sale', uselist=False)
+
+class ManualEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    description = db.Column(db.String(200), nullable=False)
+    # entry_type: 'in' (money added), 'out' (money taken out), 'transfer' (cash moved to bank)
+    entry_type = db.Column(db.String(20), nullable=False)
+    # payment_method: 'cash' or 'bank'
+    payment_method = db.Column(db.String(20), nullable=False, default='cash')
+    amount = db.Column(db.Numeric(10, 2), nullable=False)

@@ -119,6 +119,23 @@
                             value="{{ invoice.total_amount }}" readonly>
                     </div>
                 </div>
+                <div class="row mt-2">
+                    <div class="col-md-9 text-end">
+                        <strong>Advance Payment:</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" id="advance_payment" name="advance_payment" step="0.01"
+                            value="{{ invoice.advance_payment or 0 }}" {% if invoice.status=='paid' %}readonly{% endif %} min="0" onchange="updateBalance()">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-9 text-end">
+                        <strong>Balance Due:</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" id="balance_due" readonly>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -128,11 +145,27 @@
             </div>
             <div>
                 <button type="button" class="btn btn-success me-2" onclick="printInvoice()">
-                    <i class="fas fa-print"></i> Print
+                    <i class="bi bi-printer"></i> Print
                 </button>
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-share"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="shareWhatsApp(); return false;">
+                                <i class="bi bi-whatsapp text-success"></i> WhatsApp
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="shareEmail(); return false;">
+                                <i class="bi bi-envelope text-primary"></i> Email
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 {% if invoice.status != 'paid' %}
-                <button type="button" class="btn btn-success me-2" data-invoice-id="{{ invoice.id }}"
-                    onclick="markInvoicePaid(this)">
+                <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#payModal">
                     Mark as Paid
                 </button>
                 <button type="submit" class="btn btn-primary me-2">Save Changes</button>
@@ -143,6 +176,29 @@
             </div>
         </div>
     </form>
+</div>
+
+<!-- Payment Method Modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mark as Paid</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-3">How was this invoice paid?</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-lg" onclick="confirmMarkPaid('cash')">
+                        <i class="fas fa-money-bill-wave"></i> Cash
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="confirmMarkPaid('bank')">
+                        <i class="fas fa-university"></i> Bank Transfer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -210,38 +266,79 @@
             .map(input => parseFloat(input.value) || 0);
         const total = prices.reduce((sum, price) => sum + price, 0);
         document.getElementById('total_amount').value = total.toFixed(2);
+        updateBalance();
     }
 
-    function markInvoicePaid(button) {
-        if (!confirm('Are you sure you want to mark this invoice as paid? This action cannot be undone.')) {
-            return;
-        }
+    function updateBalance() {
+        const total = parseFloat(document.getElementById('total_amount').value) || 0;
+        const advance = parseFloat(document.getElementById('advance_payment').value) || 0;
+        const balance = total - advance;
+        document.getElementById('balance_due').value = Math.max(0, balance).toFixed(2);
+    }
 
-        const invoiceId = button.getAttribute('data-invoice-id');
-
-        fetch(`/invoice/${invoiceId}/mark_paid`, {
+    function confirmMarkPaid(paymentMethod) {
+        bootstrap.Modal.getInstance(document.getElementById('payModal')).hide();
+        fetch(`/invoice/{{ invoice.id }}/mark_paid`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_method: paymentMethod })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/';
+            } else {
+                alert('Failed to mark invoice as paid: ' + data.message);
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/';  // Redirect to index page
-                } else {
-                    alert('Failed to mark invoice as paid: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while marking the invoice as paid');
-            });
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while marking the invoice as paid');
+        });
     }
 
     function printInvoice() {
         window.open("{{ url_for('print_invoice', invoice_id=invoice.id) }}", '_blank', 'width=800,height=600');
     }
+
+    function formatPhone(number) {
+        // Strip everything except digits
+        let digits = number.replace(/\D/g, '');
+        // If starts with 0, replace with country code 94 (Sri Lanka)
+        if (digits.startsWith('0')) {
+            digits = '94' + digits.slice(1);
+        }
+        return digits;
+    }
+
+    function shareWhatsApp() {
+        const phone = formatPhone('{{ invoice.repair_job.customer.contact_number }}');
+        const name = '{{ invoice.repair_job.customer.name }}';
+        const invoiceNo = 'INV-{{ invoice.id }}';
+        const amount = 'Rs {{ "%.2f"|format(invoice.total_amount) }}';
+        const msg = encodeURIComponent(
+            'Hi ' + name + ', please find your invoice ' + invoiceNo + ' for ' + amount + ' from Nano Technology. ' +
+            'Kindly save the attached PDF for your records.'
+        );
+        window.open('https://wa.me/' + phone + '?text=' + msg, '_blank');
+    }
+
+    function shareEmail() {
+        const email = '{{ invoice.repair_job.customer.email }}';
+        const subject = encodeURIComponent('Invoice INV-{{ invoice.id }} - Nano Technology');
+        const body = encodeURIComponent(
+            'Hi {{ invoice.repair_job.customer.name }},\n\n' +
+            'Please find attached your invoice INV-{{ invoice.id }} for Rs {{ "%.2f"|format(invoice.total_amount) }}.\n\n' +
+            'Thank you for choosing Nano Technology.\n\n' +
+            'Regards,\nNano Technology'
+        );
+        window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+    }
+
+    // Initialize balance on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBalance();
+    });
 </script>
 {% endblock %}
 {% endblock %}
