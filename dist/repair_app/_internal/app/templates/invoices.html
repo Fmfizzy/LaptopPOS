@@ -14,7 +14,7 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <input type="text" class="form-control" name="search" 
-                                   placeholder="Search by customer, job number or amount" 
+                                   placeholder="Search by name, phone number, model or job number"
                                    value="{{ request.args.get('search', '') }}">
                             <button type="submit" class="btn btn-primary">Search</button>
                             {% if request.args.get('search') %}
@@ -91,36 +91,58 @@
     </div>
 </div>
 
+<!-- Payment Method Modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mark as Paid</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-3">How was this invoice paid?</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-lg" onclick="submitMarkPaid('cash')">Cash</button>
+                    <button class="btn btn-primary btn-lg" onclick="submitMarkPaid('bank')">Bank Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block scripts %}
 <script>
+let pendingInvoiceId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    const markPaidButtons = document.querySelectorAll('.mark-paid-btn');
-    markPaidButtons.forEach(button => {
+    document.querySelectorAll('.mark-paid-btn').forEach(button => {
         button.addEventListener('click', function() {
-            const invoiceId = this.dataset.invoiceId;
-            
-            if (!confirm('Are you sure you want to mark this invoice as paid? This action cannot be undone.')) {
-                return;
-            }
-            
-            fetch(`/invoice/${invoiceId}/mark_paid`, {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to mark invoice as paid: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to mark invoice as paid');
-            });
+            pendingInvoiceId = this.dataset.invoiceId;
+            new bootstrap.Modal(document.getElementById('payModal')).show();
         });
     });
 });
+
+function submitMarkPaid(paymentMethod) {
+    bootstrap.Modal.getInstance(document.getElementById('payModal')).hide();
+    fetch(`/invoice/${pendingInvoiceId}/mark_paid`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_method: paymentMethod })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to mark invoice as paid: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to mark invoice as paid');
+    });
+}
 </script>
 {% endblock %}
 {% endblock %}

@@ -397,10 +397,12 @@ def delete_invoice(invoice_id):
 @app.route('/invoice/<int:invoice_id>/print')
 def print_invoice(invoice_id):
     invoice = RepairInvoice.query.get_or_404(invoice_id)
-    # If the invoice's repair_job has no laptop_model, treat as item invoice
+    heading = request.args.get('heading', 'INVOICE').upper()
+    if heading not in ('INVOICE', 'QUOTATION'):
+        heading = 'INVOICE'
     if not invoice.repair_job.laptop_model:
-        return render_template('print_item_invoice.html', invoice=invoice)
-    return render_template('print_invoice.html', invoice=invoice)
+        return render_template('print_item_invoice.html', invoice=invoice, heading=heading)
+    return render_template('print_invoice.html', invoice=invoice, heading=heading)
 
 @app.route('/repair/<int:repair_id>/print')
 def print_repair(repair_id):
@@ -453,6 +455,7 @@ def view_sales():
     total_transfers = sum(float(e.amount) for e in transfers)
 
     cash_on_hand = total_cash_in - sum(float(e.amount) for e in money_out if e.payment_method == 'cash') - total_transfers
+    cash_in_bank = total_bank_in - sum(float(e.amount) for e in money_out if e.payment_method == 'bank') + total_transfers
     net = total_sales - total_out
 
     return render_template('sales.html',
@@ -463,11 +466,10 @@ def view_sales():
         total_sales=total_sales,
         total_invoice_sales=total_invoice_sales,
         total_manual_in=total_manual_in,
-        total_cash_in=total_cash_in,
-        total_bank_in=total_bank_in,
         total_out=total_out,
         total_transfers=total_transfers,
         cash_on_hand=cash_on_hand,
+        cash_in_bank=cash_in_bank,
         net=net,
         period=period,
         offset=offset,

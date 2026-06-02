@@ -129,7 +129,7 @@
         </div>
 
         <div class="title">
-            <h1>INVOICE</h1>
+            <h1>{{ heading }}</h1>
         </div>
 
         <table class="info-table">
@@ -175,6 +175,16 @@
                     <td colspan="3" style="text-align: right"><strong>Total Amount:</strong></td>
                     <td style="text-align: right">{{ "%.2f"|format(invoice.total_amount) }}</td>
                 </tr>
+                {% if invoice.advance_payment and invoice.advance_payment > 0 %}
+                <tr>
+                    <td colspan="3" style="text-align: right"><strong>Advance Paid:</strong></td>
+                    <td style="text-align: right">{{ "%.2f"|format(invoice.advance_payment) }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right"><strong>Balance Due:</strong></td>
+                    <td style="text-align: right">{{ "%.2f"|format(invoice.total_amount - invoice.advance_payment) }}</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
 

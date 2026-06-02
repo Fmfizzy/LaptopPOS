@@ -18,8 +18,8 @@
                     <input type="text" class="form-control" id="contact_number" name="contact_number" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email">
+                    <label for="laptop_model" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="laptop_model" name="laptop_model">
                 </div>
             </div>
         </div>
@@ -65,6 +65,22 @@
                     <input type="number" class="form-control" id="total_amount" name="total_amount" readonly>
                 </div>
             </div>
+            <div class="row mt-2">
+                <div class="col-md-9 text-end">
+                    <strong>Advance Payment:</strong>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="advance_payment" name="advance_payment" step="0.01" value="0" min="0" onchange="updateBalance()">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-9 text-end">
+                    <strong>Balance Due:</strong>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="balance_due" readonly>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -93,6 +109,14 @@ function updateTotal() {
         .map(input => parseFloat(input.value) || 0);
     const total = prices.reduce((sum, price) => sum + price, 0);
     document.getElementById('total_amount').value = total.toFixed(2);
+    updateBalance();
+}
+
+function updateBalance() {
+    const total = parseFloat(document.getElementById('total_amount').value) || 0;
+    const advance = parseFloat(document.getElementById('advance_payment').value) || 0;
+    const balance = total - advance;
+    document.getElementById('balance_due').value = Math.max(0, balance).toFixed(2);
 }
 </script>
 {% endblock %}
